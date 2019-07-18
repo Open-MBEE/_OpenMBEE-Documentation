@@ -22,7 +22,8 @@ from com.nomagic.uml2.ext.magicdraw.classes.mdkernel import Constraint
 from gov.nasa.jpl.mbee.mdk.api.incubating.convert import Converters
 
 replacementCount = 0
-slotre = re.compile('id="([0-9a-z\\-]+)"')
+res = [re.compile('id="([0-9a-z\\-]+)"'), re.compile("/([0-9a-z\\-]+)"), re.compile("get\\('([0-9a-z\\-]+)'\\)"), re.compile('\\(([0-9a-z\\-]+)\\)'), re.compile("id='([0-9a-z\\-]+)'")]
+
 def replaceElementsRecursively(element):
 	global replacementCount
 
@@ -104,13 +105,14 @@ def replaceName(element):
 
 def replaceString(s):
 	replaced = s
-	results = slotre.findall(replaced)
-	for result in results:
-		instance = project.getElementByID(result)
-		if instance is not None:
-			id = Converters.getElementToIdConverter().apply(instance)
-			replaced = replaced.replace(result, id)
-			Application.getInstance().getGUILog().log('[INFO] replacing ' + result + ' with ' + id)
+	for re in res:
+		results = re.findall(replaced)
+		for result in results:
+			instance = project.getElementByID(result)
+			if instance is not None:
+				id = Converters.getElementToIdConverter().apply(instance)
+				replaced = replaced.replace(result, id)
+				Application.getInstance().getGUILog().log('[INFO] replacing ' + result + ' with ' + id)
 	return replaced
 
 project = Application.getInstance().getProject()
